@@ -9,7 +9,7 @@
   [& args]
   (println "Hello, World!"))
 
-(def conn nil)
+(defonce conn nil)
 (def tempid d/tempid)
 
 (defn connect
@@ -44,3 +44,30 @@
    (transact conn tx))
   ([conn tx]
    @(d/transact conn tx)))
+
+(defn retract-entities
+  ([entities]
+   (retract-entities conn entities))
+  ([conn entities]
+   (->> (mapv #(list :db.fn/retractEntity (:db/id %)) entities)
+        (transact conn))))
+
+(defn retract-entity
+  ([entity]
+   (retract-entity conn entity))
+  ([conn entity]
+   (retract-entities conn [entity])))
+
+(defn transact-entities
+  ([entities]
+   (transact-entities conn entities))
+  ([conn entities]
+   (let [{:keys [db-after tempids] :as tx} (transact conn entities)]
+     (->> (map #(d/resolve-tempid db-after tempids (:db/id %)) entities)
+          (map #(d/entity db-after %))))))
+
+(defn transact-entity
+  ([entity]
+   (transact-entity conn entity))
+  ([conn entity]
+   (first (transact-entities conn [entity]))))
