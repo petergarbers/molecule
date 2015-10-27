@@ -39,6 +39,16 @@
   ([db entity-id]
    (d/entity db entity-id)))
 
+(defn entity-map
+  ([db-part m] (apply entity-map db-part (apply concat m)))
+  ([db-part k v & keyvals]
+   {:pre [(instance? clojure.lang.Named db-part)
+          (= (namespace db-part) "db.part")
+          (even? (count keyvals))]}
+   (->> (apply hash-map :db/id (d/tempid db-part) k v keyvals)
+        (remove (comp nil? val))
+        (into {}))))
+
 (defn transact
   ([tx]
    (transact conn tx))
