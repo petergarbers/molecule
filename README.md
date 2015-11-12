@@ -18,7 +18,50 @@ FIXME: listing of options this app accepts.
 
 ## Examples
 
-...
+You can get an entity
+
+```clj
+
+(entity 123123123)
+
+
+```
+
+You can get multiple entities
+
+```clj
+(entities {:db/id [123 3434]}
+
+```
+
+You can get all the entities in a collection
+
+```clj
+
+(db/entities :account/users)
+
+```
+
+You can traverse backref relationships
+
+```clj
+
+(entities {:account/_users account-id})
+
+```
+
+You can pass multiple parameters
+
+```clj
+
+(db/entities {:account/_users account-id :user/first-name "bobby" :user/age 19})
+
+```
+
+Transact returns the entity at the end of the transaction
+
+
+
 
 ### Bugs
 

@@ -35,12 +35,6 @@
   (when (d/create-database uri)
     (connect uri)))
 
-(defn entity
-  ([entity-id]
-   (entity (db) entity-id))
-  ([db entity-id]
-   (d/entity db entity-id)))
-
 (defn entity-map
   ([db-part m] (apply entity-map db-part (apply concat m)))
   ([db-part k v & keyvals]
@@ -66,8 +60,8 @@
 (defn- reverse-attr
   "Reverses the direction of an attribute. Intended for ref attributes only.
   For example:
-    - given :a/_b, returns :a/b
-    - given :a/b, returns :a/_b"
+  - given :a/_b, returns :a/b
+  - given :a/b, returns :a/_b"
   [attr]
   (let [name (name attr)]
     (keyword (namespace attr)
@@ -192,3 +186,16 @@
    (transact-entity conn entity))
   ([conn entity]
    (first (transact-entities conn [entity]))))
+
+(defn entity
+  ([entity-id]
+   (entity (db) entity-id))
+  ([db entity-id]
+   (d/entity db entity-id)))
+
+
+(defn entities
+  ([filters] (entities (db) filters))
+  ([db filters]
+   (->> (e db filters)
+        (map #(d/entity db %)))))
