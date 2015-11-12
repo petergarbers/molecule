@@ -4,6 +4,7 @@
             [molecule.core :refer :all]))
 
 
+
 (deftest entity-map-test
   (testing "Will create an entity map with the correct db.part"
     (let [em (entity-map :db.part/moo :a :b)
