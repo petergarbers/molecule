@@ -4,15 +4,9 @@
   (:require [clojure.java.io :as io]
             [datomic.api :as d]))
 
-(defn -main
-  "I don't do a whole lot ... yet."
-  [& args]
-  (println "Hello, World!"))
-
-(def ^:private base-entity-query '[{:find [?e] :with [] :in [$] :where []}])
+(def base-entity-query '[{:find [?e] :with [] :in [$] :where []}])
 
 (defonce conn nil)
-(def tempid d/tempid)
 
 (defn connect
   "Connects to database"
@@ -45,7 +39,7 @@
         (remove (comp nil? val))
         (into {}))))
 
-(defn- lookup
+(defn lookup
   [db index entity-key & components]
   (->> (apply d/datoms db index components)
        (map entity-key)
@@ -111,20 +105,15 @@
 (defn query-param
   ;; TODO support additional binding forms
   ;; TODO support functions
-  ([query attr]
-   (let [back-ref? (back-ref? attr)
-         attr (if back-ref? (reverse-attr attr) attr)
-         eav (if back-ref? ['_ attr '?e] ['?e attr])]
-     (update-in query [0 :where] conj eav)))
-  ([query attr val]
-   (let [back-ref? (back-ref? attr)
-         attr (if back-ref? (reverse-attr attr) attr)
-         sym (gensym "?")
-         bind (if (coll? val) [sym '...] sym)
-         eav (if back-ref? [sym attr '?e] ['?e attr sym])]
-     (-> (conj query val)
-         (update-in [0 :in] conj bind)
-         (update-in [0 :where] conj eav)))))
+  [query attr val]
+  (let [back-ref? (back-ref? attr)
+        attr (if back-ref? (reverse-attr attr) attr)
+        sym (gensym "?")
+        bind (if (coll? val) [sym '...] sym)
+        eav (if back-ref? [sym attr '?e] ['?e attr sym])]
+    (-> (conj query val)
+        (update-in [0 :in] conj bind)
+        (update-in [0 :where] conj eav))))
 
 (defn e
   "Find entity ids based on filters:
@@ -135,10 +124,12 @@
   ;; TODO support magic :db.value/any value?
   ([filters] (e (d/db conn) filters))
   ([db filters]
+   (prn "AAAAA" (keyword? filters))
    (if (keyword? filters)
      ;; Special case: filters is a keyword
      (let [back-ref? (back-ref? filters)
            attr (if back-ref? (reverse-attr filters) filters)]
+
        (if back-ref?
          (lookup db :aevt :v attr)
          (lookup db :aevt :e attr)))
@@ -150,9 +141,39 @@
                                   (conj eids)))]
        (if (or (seq eids) (and (not ids?) (seq filters)))
          (->> (reduce #(apply query-param %1 %2) query filters)
-              (apply q)
-              (map first))
+              ;;(apply q)
+              ;;(map first)
+              )
          ())))))
+
+(defn base-query
+  [db entity-ids]
+  (cond-> (conj base-entity-query db)
+    (seq entity-ids) (-> (update-in [0 :in] conj '[?e ...])
+                         (conj entity-ids))))
+
+(defn e2
+  ([attributes] (e2 (d/db conn) attributes))
+  ([db attributes]
+   (let [eids (:db/id attributes)]
+     (cond
+       (keyword? attributes)
+       (let [lookup-fn (partial lookup db)
+             args (if (back-ref? attributes)
+                    [:aevt :v (reverse-attr attributes)]
+                    [:aevt :e attributes])]
+         (apply lookup-fn args))
+
+       ;; Only given eids
+       (and eids (= 1 (count attributes))) eids
+
+       (seq (dissoc attributes :db/id))
+       (let [base-query (base-query db eids)]
+         (->> (apply q base-query)
+              (map first)))
+
+       :else
+       ()))))
 
 (defn transact
   ([tx]
