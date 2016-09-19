@@ -14,20 +14,10 @@
   (alter-var-root #'conn (constantly (d/connect uri)))
   conn)
 
-(defn delete-database
-  [uri]
-  (d/delete-database uri))
-
 (defn db
   "Retrieves a value of the database."
   []
   (d/db conn))
-
-(defn init
-  "Creates, initializes, and returns a database value if it does not exist."
-  [uri]
-  (when (d/create-database uri)
-    (connect uri)))
 
 (defn entity-map
   ([db-part m] (apply entity-map db-part (apply concat m)))
@@ -100,8 +90,6 @@
   (apply d/q query db inputs))
 
 (defn query-param
-  ;; TODO support additional binding forms
-  ;; TODO support functions
   [query attr val]
   (let [back-ref? (back-ref? attr)
         attr (if back-ref? (reverse-attr attr) attr)
@@ -111,8 +99,6 @@
     (-> (conj query val)
         (update-in [0 :in] conj bind)
         (update-in [0 :where] conj eav))))
-
-
 
 (defn base-query
   [db entity-ids]
@@ -143,8 +129,7 @@
              query (reduce #(apply query-param %1 %2)
                            (conj base-entity-query db)
                            q-params)]
-         (prn "query" query)
-         (apply q query))
+         (map first (apply q query)))
 
        :else
        ()))))
@@ -154,7 +139,6 @@
    (entity (db) entity-id))
   ([db entity-id]
    (d/entity db entity-id)))
-
 
 (defn entities
   ([filters] (entities (db) filters))
