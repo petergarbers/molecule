@@ -115,37 +115,7 @@
         (update-in [0 :in] conj bind)
         (update-in [0 :where] conj eav))))
 
-(defn e
-  "Find entity ids based on filters:
-  - single attribute, returns all entities with that attribute
-  - map of {attr val} pairs
-  - map of {attr vals} pairs (where vals is a collection)
-  Note: attributes with nil vals or empty collections are ignored."
-  ;; TODO support magic :db.value/any value?
-  ([filters] (e (d/db conn) filters))
-  ([db filters]
-   (if (keyword? filters)
-     ;; Special case: filters is a keyword
-     (let [back-ref? (back-ref? filters)
-           attr (if back-ref? (reverse-attr filters) filters)]
 
-       (if back-ref?
-         (lookup db :aevt :v attr)
-         (lookup db :aevt :e attr)))
-     (let [ids? (contains? filters :db/id)
-           eids (->> (:db/id filters) values (keep eid))
-           filters (->> (dissoc filters :db/id))
-           query (cond-> (conj base-entity-query db)
-                   (seq eids) (-> (update-in [0 :in] conj '[?e ...])
-                                  (conj eids)))]
-       (if (or (seq eids) (and (not ids?) (seq filters)))
-         (do (prn "FFFF")
-           (->> (reduce #(apply query-param %1 %2) query filters)
-                (#(do (prn "AAAAAAA" filters) %))
-                (apply q)
-                ;;(map first)
-                ))
-         ())))))
 
 (defn base-query
   [db entity-ids]
@@ -153,8 +123,8 @@
     (seq entity-ids) (-> (update-in [0 :in] conj '[?e ...])
                          (conj entity-ids))))
 
-(defn e2
-  ([attributes] (e2 (d/db conn) attributes))
+(defn e
+  ([attributes] (e (d/db conn) attributes))
   ([db attributes]
    (let [eids (:db/id attributes)]
      (cond
@@ -181,39 +151,6 @@
 
        :else
        ()))))
-
-(defn transact
-  ([tx]
-   (transact conn tx))
-  ([conn tx]
-   @(d/transact conn tx)))
-
-(defn retract-entities
-  ([entities]
-   (retract-entities conn entities))
-  ([conn entities]
-   (->> (mapv #(list :db.fn/retractEntity (:db/id %)) entities)
-        (transact conn))))
-
-(defn retract-entity
-  ([entity]
-   (retract-entity conn entity))
-  ([conn entity]
-   (retract-entities conn [entity])))
-
-(defn transact-entities
-  ([entities]
-   (transact-entities conn entities))
-  ([conn entities]
-   (let [{:keys [db-after tempids] :as tx} (transact conn entities)]
-     (->> (map #(d/resolve-tempid db-after tempids (:db/id %)) entities)
-          (map #(d/entity db-after %))))))
-
-(defn transact-entity
-  ([entity]
-   (transact-entity conn entity))
-  ([conn entity]
-   (first (transact-entities conn [entity]))))
 
 (defn entity
   ([entity-id]
