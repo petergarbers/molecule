@@ -2,20 +2,19 @@
   (:gen-class)
   (:import datomic.Util)
   (:require [clojure.java.io :as io]
-            [datomic.api :as d]))
+            [datomic.api :as d]
+            [clojure.string :as str]))
 
 (def base-entity-query '[{:find [?e] :with [] :in [$] :where []}])
 
 (defonce conn nil)
 
 (defn connect
-  "Connects to database"
   [uri]
   (alter-var-root #'conn (constantly (d/connect uri)))
   conn)
 
 (defn db
-  "Retrieves a value of the database."
   []
   (d/db conn))
 
@@ -42,14 +41,13 @@
   (and (keyword? attr) (namespace attr) (.startsWith (name attr) "_")))
 
 (defn- reverse-attr
-  "Reverses the direction of an attribute. Intended for ref attributes only.
-  For example:
-  - given :a/_b, returns :a/b
-  - given :a/b, returns :a/_b"
+  "Reverses the direction of an attribute.
+  :a/_b => :a/b
+  :a/b => :a/_b"
   [attr]
   (let [name (name attr)]
     (keyword (namespace attr)
-             (if (.startsWith name "_") (subs name 1) (str "_" name)))))
+             (if (str/starts-with? name "_") (subs name 1) (str "_" name)))))
 
 (defn- lookup-ref?
   [x]
@@ -75,15 +73,6 @@
     (eid? x) x
     (or (entity? x) (map? x)) (:db/id x)
     (string? x) (try (Long/valueOf x) (catch Exception e))))
-
-(defn- values
-  "Coerces x to a (possibly empty) sequence, if it is not already one.
-  If x is a primitive value, yields (list x).  (sequence nil) yields ()"
-  [x]
-  (cond
-    (coll? x) x
-    (nil? x) ()
-    :else (list x)))
 
 (defn q
   [query db & inputs]
