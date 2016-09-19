@@ -45,33 +45,42 @@
 (deftest query-param-test
   (let [base-query (base-query "db-value" nil)]
     (testing "base query"
-      (let [query (query-param base-query :account/name "fudge")]
+      (let [query (query-param base-query :object/name "fudge")]
         (prn query)))))
 
 (deftest e-test
   (with-redefs [d/db (constantly "somedbvalue")
                 d/q (fn [a b c] a)]
     (testing "returns empty list if no eids or filters"
-      (is (empty? (e2 {})))
-      (is (empty? (e2 nil)))
-      (is (empty? (e2 {:db/id []}))))
+      (is (empty? (e {})))
+      (is (empty? (e nil)))
+      (is (empty? (e {:db/id []}))))
 
     (testing "if given :db/ids it will return a list of db/ids"
-      (is (= [123123 234234] (e2 {:db/id [123123 234234]}))))
+      (is (= [123123 234234] (e {:db/id [123123 234234]}))))
 
     (with-redefs [lookup (fn [db index entity-key & components]
                            [index entity-key components])]
       (testing "find all entities with attribute (no backref)"
-        (is (= (e2 :account/name) [:aevt :e '(:account/name)])))
+        (is (= (e :object/name) [:aevt :e '(:object/name)])))
 
       (testing "find all entities with attribute (with backref)"
-        (is (= (e2 :account/_name) [:aevt :v '(:account/name)]))))
+        (is (= (e :object/_name) [:aevt :v '(:object/name)]))))
 
     (testing "queries filters and values"
       (with-redefs [gensym (constantly '?123)]
-        (is (= (e2 {:dog/sound "woof"})
+        (is (= (e {:dog/sound "woof"})
                {:find ['?e], :with [], :in ['$ '?123], :where [['?e :dog/sound '?123]]}))))))
 
 (deftest real-transactions-test
-  (testing "can find an entity by attributes"
-    (entities {:object/name "Uranus"})))
+  (let [db (d/db test-conn)]
+    (testing "can find an entity by the id"
+      (let [uranus-id (ffirst (d/q '[:find ?e
+                                     :where
+                                     [?e :object/name "Uranus"]]
+                                   db))]
+        (is (entity? (first (entities db {:db/id [uranus-id]}))))
+        (is (entity? (entity db uranus-id)))))
+    (testing "can find an entity by attributes"
+      (is (= "Uranus"
+             (:object/name (first (entities db {:object/name "Uranus"}))))))))
