@@ -124,7 +124,6 @@
   ;; TODO support magic :db.value/any value?
   ([filters] (e (d/db conn) filters))
   ([db filters]
-   (prn "AAAAA" (keyword? filters))
    (if (keyword? filters)
      ;; Special case: filters is a keyword
      (let [back-ref? (back-ref? filters)
@@ -140,10 +139,12 @@
                    (seq eids) (-> (update-in [0 :in] conj '[?e ...])
                                   (conj eids)))]
        (if (or (seq eids) (and (not ids?) (seq filters)))
-         (->> (reduce #(apply query-param %1 %2) query filters)
-              ;;(apply q)
-              ;;(map first)
-              )
+         (do (prn "FFFF")
+           (->> (reduce #(apply query-param %1 %2) query filters)
+                (#(do (prn "AAAAAAA" filters) %))
+                (apply q)
+                ;;(map first)
+                ))
          ())))))
 
 (defn base-query
@@ -165,12 +166,18 @@
          (apply lookup-fn args))
 
        ;; Only given eids
+       ;; i.e. (entities {:db/id [123123 12344]})
        (and eids (= 1 (count attributes))) eids
 
+       ;; Given attributes to query on
+       ;; i.e. (entities {:foo "bar"})
        (seq (dissoc attributes :db/id))
-       (let [base-query (base-query db eids)]
-         (->> (apply q base-query)
-              (map first)))
+       (let [q-params (dissoc attributes :db/id)
+             query (reduce #(apply query-param %1 %2)
+                           (conj base-entity-query db)
+                           q-params)]
+         (prn "query" query)
+         (apply q query))
 
        :else
        ()))))
