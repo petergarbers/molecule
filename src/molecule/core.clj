@@ -97,10 +97,7 @@
 
 (defn q
   [query db & inputs]
-  (try (apply d/q query db inputs)
-       (catch Exception e
-         ;; TODO: do something
-         (throw e))))
+  (apply d/q query db inputs))
 
 (defn query-param
   ;; TODO support additional binding forms
