@@ -49,6 +49,7 @@
         (prn query)))))
 
 (deftest e-test
+  (prn "AAAA")
   (with-redefs [d/db (constantly "somedbvalue")
                 d/q (fn [a b c] a)]
     (testing "returns empty list if no eids or filters"

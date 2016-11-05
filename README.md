@@ -67,6 +67,9 @@ Transact returns the entity at the end of the transaction
 
 ...
 
+### TODO:
+Warn if datomic dependency isn't present
+
 ### Any Other Sections
 ### That You Think
 ### Might be Useful

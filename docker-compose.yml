@@ -1,7 +1,12 @@
-web:
-  build: .
-  command: lein repl :headless :host 0.0.0.0 :port 4343
-  volumes:
-    - "./molecule/.:/src/app"
-  ports:
-    - "4343:4343"
+version: '2'
+
+services:
+  molecule:
+    build: .
+    command: lein repl :headless :host 0.0.0.0 :port 4343
+    environment:
+      - LEIN_REPL_PORT=4343
+    volumes:
+      - ./molecule/.:/src/app
+    ports:
+      - "4343:4343"
