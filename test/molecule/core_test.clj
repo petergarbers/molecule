@@ -7,14 +7,14 @@
 
 (def db-uri-base "datomic:mem://")
 
-(defn scratch-conn
+(defn init-conn
   []
   (let [uri (str db-uri-base (d/squuid))]
     (d/delete-database uri)
     (d/create-database uri)
     (d/connect uri)))
 
-(def test-conn (scratch-conn))
+(def test-conn (init-conn))
 
 (defn read-all
   "Read all forms in f, where f is any resource that can
@@ -68,7 +68,7 @@
       (testing "find all entities with attribute (with backref)"
         (is (= (e :object/_name) [:aevt :v '(:object/name)]))))
 
-    #_(testing "queries filters and values"
+    #_(testing "queries filters and values" ;; TODO: Fails because of map first. Test seems to be correct
       (with-redefs [gensym (constantly '?123)]
         (is (= (e {:dog/sound "woof"})
                {:find ['?e], :with [], :in ['$ '?123], :where [['?e :dog/sound '?123]]}))))))
@@ -84,5 +84,10 @@
         (is (= uranus-id (:db/id (first (entities db {:db/id [uranus-id]})))))
         (is (entity? (entity db uranus-id)))))
     (testing "can find an entity by attributes"
+      (prn "FFFFFFFFFFFF" (:object/type (first (entities db {:object/name "Jupiter"}))))
       (is (= "Uranus"
-             (:object/name (first (entities db {:object/name "Uranus"}))))))))
+             (:object/name (first (entities db {:object/name "Uranus"}))))))
+
+    (testing "can navigate back-references"
+      (prn "FFFFFFFFFFFF" (:object/type (first (entities db {:object/name "Jupiter"}))))
+      (prn (entities db (:object/name "Jupiter"))))))

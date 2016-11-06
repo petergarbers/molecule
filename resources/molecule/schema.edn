@@ -1,3 +1,4 @@
+;; https://github.com/Datomic/day-of-datomic/blob/master/resources/day-of-datomic/bigger-than-pluto.edn
 [{:db/id #db/id [:db.part/db]
   :db/ident :object/name
   :db/doc "Name of a Solar System object."
@@ -12,6 +13,14 @@
   :db/valueType :db.type/double
   :db/cardinality :db.cardinality/one
   :db.install/_attribute :db.part/db}
+ {:db/id #db/id[:db.part/db]
+  :db/doc "Type of object"
+  :db/ident :object/type
+  :db/valueType :db.type/ref
+  :db/isComponent false
+  :db/cardinality :db.cardinality/one
+  :db.install/_attribute :db.part/db}
+ {:db/id #db/id[:db.part/user] :db/ident :object.type/solid}
  {:db/id #db/id [:db.part/db]
   :db/ident :data/source
   :db/doc "Source of the data in a transaction."
@@ -28,6 +37,7 @@
   :object/meanRadius 696000.0}
  {:db/id #db/id [:db.part/user]
   :object/name "Jupiter"
+  :object/type :object.type/solid
   :object/meanRadius 69911.0}
  {:db/id #db/id [:db.part/user]
   :object/name "Saturn"
