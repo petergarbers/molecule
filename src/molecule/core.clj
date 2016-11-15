@@ -3,7 +3,8 @@
   (:import datomic.Util)
   (:require [clojure.java.io :as io]
             [datomic.api :as d]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [molecule.db :as db]))
 
 (def base-entity-query '[{:find [?e] :with [] :in [$] :where []}])
 
@@ -15,8 +16,8 @@
   conn)
 
 (defn db
-  []
-  (d/db conn))
+  ([] (db conn))
+  ([x] (db/as-db x)))
 
 (defn entity-map
   ([db-part m] (apply entity-map db-part (apply concat m)))

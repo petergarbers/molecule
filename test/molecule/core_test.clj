@@ -2,17 +2,19 @@
   (:require [clojure.java.io :as io]
             [clojure.test :refer :all]
             [datomic.api :as d]
-            [molecule.core :refer :all])
+            [molecule.core :refer :all]
+            [molecule.db :as db])
   (:import datomic.Util))
 
 (def db-uri-base "datomic:mem://")
+(def db-uri (str db-uri-base (d/squuid)))
 
 (defn init-conn
   []
-  (let [uri (str db-uri-base (d/squuid))]
-    (d/delete-database uri)
-    (d/create-database uri)
-    (d/connect uri)))
+  (prn db-uri)
+  (d/delete-database db-uri)
+  (d/create-database db-uri)
+  (d/connect db-uri))
 
 (def test-conn (init-conn))
 
@@ -34,6 +36,15 @@
       {:datoms n})))
 
 (transact-all test-conn (io/resource "molecule/schema.edn"))
+
+(deftest db-test
+  (testing "will return the db if you pass it a connection"
+    (is (instance? datomic.db.Db (db test-conn))))
+  (testing "will return the db if you pass it a db"
+    (let [db (db (d/db (d/connect db-uri)))]
+      (is (instance? datomic.db.Db db))))
+  (testing "will return the db if you pass it a db-uri"
+    (is (instance? datomic.db.Db (db db-uri)))))
 
 (deftest entity-map-test
   (testing "Will create an entity map with the correct db.part"
