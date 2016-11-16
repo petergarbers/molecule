@@ -11,7 +11,6 @@
 
 (defn init-conn
   []
-  (prn db-uri)
   (d/delete-database db-uri)
   (d/create-database db-uri)
   (d/connect db-uri))
@@ -60,7 +59,6 @@
         (prn query)))))
 
 (deftest e-test
-  (prn "AAAA")
   (with-redefs [d/db (constantly "somedbvalue")
                 d/q (fn [a b c] a)]
     (testing "returns empty list if no eids or filters"
@@ -87,18 +85,24 @@
 (deftest real-transactions-test
   (let [db (d/db test-conn)]
     (testing "can find an entity by the id"
-      (let [uranus-id (ffirst (d/q '[:find ?e
-                                     :where
-                                     [?e :object/name "Uranus"]]
-                                   db))]
-        (is (entity? (first (entities db {:db/id [uranus-id]}))))
-        (is (= uranus-id (:db/id (first (entities db {:db/id [uranus-id]})))))
-        (is (entity? (entity db uranus-id)))))
+        (let [uranus-id (ffirst (d/q '[:find ?e
+                                       :where
+                                       [?e :object/name "Uranus"]]
+                                     db))]
+          (is (entity? (first (entities db {:db/id [uranus-id]}))))
+          (is (= uranus-id (:db/id (first (entities db {:db/id [uranus-id]})))))
+          (is (entity? (entity db uranus-id)))))
     (testing "can find an entity by attributes"
-      (prn "FFFFFFFFFFFF" (:object/type (first (entities db {:object/name "Jupiter"}))))
-      (is (= "Uranus"
-             (:object/name (first (entities db {:object/name "Uranus"}))))))
+        (is (= "Uranus"
+               (:object/name (first (entities db {:object/name "Uranus"}))))))
 
-    (testing "can navigate back-references"
-      (prn "FFFFFFFFFFFF" (:object/type (first (entities db {:object/name "Jupiter"}))))
-      (prn (entities db (:object/name "Jupiter"))))))
+    (testing "correctly traverses backrefs"
+      (let [planet-ids (e db :object/name)
+            solar-system-temp-id (d/tempid :db.part/user)
+            {:keys [db-after tempids]} @(d/transact test-conn [{:db/id solar-system-temp-id
+                                                                :solar-system/name "Milkyway"
+                                                                :solar-system/planets planet-ids}])
+            solar-system-id (d/resolve-tempid db-after tempids solar-system-temp-id)
+            uranus (first (entities db-after {:object/name "Uranus"}))]
+        (is (= [uranus]
+               (entities db-after {:solar-system/_planets solar-system-id :object/name "Uranus"})))))))

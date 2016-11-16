@@ -1,5 +1,19 @@
 ;; https://github.com/Datomic/day-of-datomic/blob/master/resources/day-of-datomic/bigger-than-pluto.edn
 [{:db/id #db/id [:db.part/db]
+  :db/ident :solar-system/name
+  :db/doc "Name of a Solar System"
+  :db/valueType :db.type/string
+  :db/index true
+  :db/cardinality :db.cardinality/one
+  :db.install/_attribute :db.part/db}
+ {:db/id #db/id[:db.part/db]
+  :db/doc "Planets in the solar system"
+  :db/ident :solar-system/planets
+  :db/valueType :db.type/ref
+  :db/isComponent true
+  :db/cardinality :db.cardinality/many
+  :db.install/_attribute :db.part/db}
+ {:db/id #db/id [:db.part/db]
   :db/ident :object/name
   :db/doc "Name of a Solar System object."
   :db/valueType :db.type/string
