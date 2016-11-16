@@ -83,6 +83,7 @@
       (let [planet-ids (e db :object/name)
             solar-system-temp-id (d/tempid :db.part/user)
             {:keys [db-after tempids]} @(d/transact @conn [{:db/id solar-system-temp-id
+                                                            ;; Yes this should be a galaxy
                                                             :solar-system/name "Milkyway"
                                                             :solar-system/planets planet-ids}])
             solar-system-id (d/resolve-tempid db-after tempids solar-system-temp-id)
