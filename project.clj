@@ -1,4 +1,4 @@
-(defproject molecule "0.1.0-Molecule"
+(defproject molecule "0.1.0-SNAPSHOT"
   :description "A datomic wrapper to make queries easier"
   :url "https://www.github.com/petergarbers/molecule"
   :license {:name "Eclipse Public License"

@@ -96,6 +96,9 @@
         (is (= "Uranus"
                (:object/name (first (entities db {:object/name "Uranus"}))))))
 
+    (testing "can get all entities for a collection"
+      (is (<= 9 (count (entities db :object/name)))))
+
     (testing "correctly traverses backrefs"
       (let [planet-ids (e db :object/name)
             solar-system-temp-id (d/tempid :db.part/user)
