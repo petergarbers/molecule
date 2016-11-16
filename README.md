@@ -1,44 +1,55 @@
 # molecule [![Build Status](https://travis-ci.org/petergarbers/molecule.svg?branch=master)](https://travis-ci.org/petergarbers/molecule)
 
-FIXME: description
 
 ## Installation
 
-Download from http://example.com/FIXME.
 
-## Usage
+```clj
 
-FIXME: explanation
+[molecule "0.1.0-SNAPSHOT" :exclusions [com.datomic.datomic-free]] ;; add to your project.clj
 
-    $ java -jar molecule-0.1.0-standalone.jar [args]
+```
 
-## Options
-
-FIXME: listing of options this app accepts.
 
 ## Examples
 
-You can get an entity
+Include in your namespace
 
 ```clj
 
-(entity 123123123)
+(:require [molecule.core :as m])
+
+```
+Connect to your database
+
+```clj
+
+(m/connect db-uri)
+
+```
+
+Fetch an entity
+
+```clj
+
+(m/entity 123123123)
 
 
 ```
 
-You can get multiple entities
+Multiple entities by ids
 
 ```clj
-(entities {:db/id [123 3434]}
+
+(m/entities {:db/id [123123123123 3434343434343]}
 
 ```
 
-You can get all the entities in a collection
+All the entities in a collection
 
 ```clj
 
-(db/entities :account/users)
+(db/entities :objects/name)
 
 ```
 
@@ -46,29 +57,14 @@ You can traverse backref relationships
 
 ```clj
 
-(entities {:account/_users account-id})
+(m/entities {:solar-system/_planets solar-system-id :object/name "Uranus"})
 
 ```
-
-You can pass multiple parameters
-
-```clj
-
-(db/entities {:account/_users account-id :user/first-name "bobby" :user/age 19})
-
-```
-
-Transact returns the entity at the end of the transaction
-
-
-
-
-### Bugs
-
-...
 
 ### TODO:
 Warn if datomic dependency isn't present
+Read database uri from ENV
+Transact entities 
 
 ### Any Other Sections
 ### That You Think
@@ -76,7 +72,7 @@ Warn if datomic dependency isn't present
 
 ## License
 
-Copyright © 2015 FIXME
+Copyright © 2016
 
 Distributed under the Eclipse Public License either version 1.0 or (at
 your option) any later version.
