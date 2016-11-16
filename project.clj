@@ -1,7 +1,7 @@
-(defproject molecule "0.1.0-SNAPSHOT"
-  :description "FIXME: write description"
-  :url "http://example.com/FIXME"
-  :license {:name "Eclipse Public License"
+(defproject molecule "0.1.0-Molecule"
+  :description "A datomic wrapper to make queries easier"
+  :url "https://www.github.com/petergarbers/molecule"
+  :license {:name "Eclipse Public License"d
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [com.datomic/datomic-free "0.9.5206" :exclusions [joda-time]]]
