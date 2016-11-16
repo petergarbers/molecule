@@ -63,12 +63,14 @@ You can traverse backref relationships
 
 ### TODO:
 Warn if datomic dependency isn't present
+
 Read database uri from ENV
+
 Transact entities 
 
-### Any Other Sections
-### That You Think
-### Might be Useful
+### Thanks
+
+Geoff Catlin 
 
 ## License
 
