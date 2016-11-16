@@ -61,12 +61,24 @@ You can traverse backref relationships
 
 ```
 
+If you just need id's
+
+```clj
+
+(m/e {:solar-system/_planets solar-system-id :object/name "Uranus"})
+
+```
+
 ### TODO:
 Warn if datomic dependency isn't present
 
 Read database uri from ENV
 
 Transact entities 
+
+Use an atom for the connection
+
+FIX https://github.com/petergarbers/molecule/blob/master/test/molecule/core_test.clj#L37
 
 ### Thanks
 

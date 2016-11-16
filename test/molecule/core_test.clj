@@ -6,39 +6,19 @@
             [molecule.db :as db])
   (:import datomic.Util))
 
-(def db-uri-base "datomic:mem://")
-(def db-uri (str db-uri-base (d/squuid)))
+(def db-uri (str "datomic:mem://" (d/squuid)))
 
-(defn init-conn
-  []
-  (d/delete-database db-uri)
-  (d/create-database db-uri)
-  (d/connect db-uri))
-
-(def test-conn (init-conn))
-
-(defn read-all
-  "Read all forms in f, where f is any resource that can
-   be opened by io/reader"
+(defn db-fixture
   [f]
-  (Util/readAll (io/reader f)))
+  (init db-uri "molecule/schema.edn" "molecule/seed.edn")
+  (f)
+  (d/delete-database db-uri))
 
-(defn transact-all
-  "Load and run all transactions from f, where f is any
-   resource that can be opened by io/reader."
-  [conn f]
-  (loop [n 0
-         [tx & more] (read-all f)]
-    (if tx
-      (recur (+ n (count (:tx-data  @(d/transact conn tx))))
-             more)
-      {:datoms n})))
-
-(transact-all test-conn (io/resource "molecule/schema.edn"))
+(use-fixtures :each db-fixture)
 
 (deftest db-test
   (testing "will return the db if you pass it a connection"
-    (is (instance? datomic.db.Db (db test-conn))))
+    (is (instance? datomic.db.Db (db @conn))))
   (testing "will return the db if you pass it a db"
     (let [db (db (d/db (d/connect db-uri)))]
       (is (instance? datomic.db.Db db))))
@@ -83,18 +63,18 @@
                {:find ['?e], :with [], :in ['$ '?123], :where [['?e :dog/sound '?123]]}))))))
 
 (deftest real-transactions-test
-  (let [db (d/db test-conn)]
+  (let [db (d/db @conn)]
     (testing "can find an entity by the id"
-        (let [uranus-id (ffirst (d/q '[:find ?e
-                                       :where
-                                       [?e :object/name "Uranus"]]
-                                     db))]
-          (is (entity? (first (entities db {:db/id [uranus-id]}))))
-          (is (= uranus-id (:db/id (first (entities db {:db/id [uranus-id]})))))
-          (is (entity? (entity db uranus-id)))))
+      (let [uranus-id (ffirst (d/q '[:find ?e
+                                     :where
+                                     [?e :object/name "Uranus"]]
+                                   db))]
+        (is (entity? (first (entities db {:db/id [uranus-id]}))))
+        (is (= uranus-id (:db/id (first (entities db {:db/id [uranus-id]})))))
+        (is (entity? (entity db uranus-id)))))
     (testing "can find an entity by attributes"
-        (is (= "Uranus"
-               (:object/name (first (entities db {:object/name "Uranus"}))))))
+      (is (= "Uranus"
+             (:object/name (first (entities db {:object/name "Uranus"}))))))
 
     (testing "can get all entities for a collection"
       (is (<= 9 (count (entities db :object/name)))))
@@ -102,9 +82,9 @@
     (testing "correctly traverses backrefs"
       (let [planet-ids (e db :object/name)
             solar-system-temp-id (d/tempid :db.part/user)
-            {:keys [db-after tempids]} @(d/transact test-conn [{:db/id solar-system-temp-id
-                                                                :solar-system/name "Milkyway"
-                                                                :solar-system/planets planet-ids}])
+            {:keys [db-after tempids]} @(d/transact @conn [{:db/id solar-system-temp-id
+                                                            :solar-system/name "Milkyway"
+                                                            :solar-system/planets planet-ids}])
             solar-system-id (d/resolve-tempid db-after tempids solar-system-temp-id)
             uranus (first (entities db-after {:object/name "Uranus"}))]
         (is (= [uranus]

@@ -8,15 +8,26 @@
 
 (def base-entity-query '[{:find [?e] :with [] :in [$] :where []}])
 
-(defonce conn nil)
+(def conn (atom nil))
 
-(defn connect
-  [uri]
-  (alter-var-root #'conn (constantly (d/connect uri)))
-  conn)
+(defn init
+  ([db-uri] (init db-uri nil))
+  ([db-uri schema-resource] (init db-uri schema-resource nil))
+  ([db-uri schema-resource seed-resource]
+   (if (d/create-database db-uri)
+     (prn "Created database" db-uri)
+     (prn "Using existing database" db-uri))
+   (let [db-conn (d/connect db-uri)]
+     (when schema-resource
+       (prn "Loading schema")
+       @(d/transact db-conn (read-string (slurp (io/resource schema-resource)))))
+     (when seed-resource
+       (prn "Loading seed data")
+       @(d/transact db-conn (read-string (slurp (io/resource seed-resource)))))
+     (reset! conn db-conn))))
 
 (defn db
-  ([] (db conn))
+  ([] (db @conn))
   ([x] (db/as-db x)))
 
 (defn entity-map
@@ -31,10 +42,9 @@
 
 (defn lookup
   [db index entity-key & components]
-  (->> (apply d/datoms db index components)
-       (map entity-key)
-       distinct
-       (remove nil?)))
+  (sequence
+   (comp (map entity-key) (distinct) (remove nil?))
+   (apply d/datoms db index components)))
 
 (defn- back-ref?
   "Returns true if attr is a back reference; e.g. :a/_b"
@@ -97,7 +107,7 @@
                          (conj entity-ids))))
 
 (defn e
-  ([attributes] (e (d/db conn) attributes))
+  ([attributes] (e (d/db @conn) attributes))
   ([db attributes]
    (let [eids (:db/id attributes)]
      (cond
