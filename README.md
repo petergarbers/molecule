@@ -19,6 +19,10 @@ Include in your namespace
 
 (:require [molecule.core :as m])
 
+;; Initialize the conn atom
+
+(m/init db-uri "schema-path.edn" "seed-data.edn")
+
 ```
 Connect to your database
 
