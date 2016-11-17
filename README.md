@@ -1,4 +1,4 @@
-# molecule [![Build Status](https://travis-ci.org/petergarbers/molecule.svg?branch=master)](https://travis-ci.org/petergarbers/molecule)
+# molecule [![Build Status](https://travis-ci.org/petergarbers/molecule.svg?branch=master)](https://travis-ci.org/petergarbers/molecule) [![Clojars Project](https://img.shields.io/clojars/v/molecule.svg)](https://clojars.org/molecule)
 
 
 ## Installation
