@@ -134,14 +134,16 @@
        :else
        ()))))
 
-(defn entity
-  ([entity-id]
-   (entity (db) entity-id))
-  ([db entity-id]
-   (d/entity db entity-id)))
-
 (defn entities
   ([filters] (entities (db) filters))
   ([db filters]
    (->> (e db filters)
         (map #(d/entity db %)))))
+
+(defn entity
+  ([entity-id]
+   (entity (db) entity-id))
+  ([db entity-id]
+   (cond
+     (integer? entity-id) (d/entity db entity-id)
+     (map? entity-id) (first (entities db entity-id)))))
