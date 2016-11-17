@@ -145,5 +145,5 @@
    (entity (db) entity-id))
   ([db entity-id]
    (cond
-     (integer? entity-id) (d/entity db entity-id)
+     (or (integer? entity-id) (vector? entity-id)) (d/entity db entity-id)
      (map? entity-id) (first (entities db entity-id)))))
