@@ -125,8 +125,8 @@ Ever needed all the entities with an attribute?!
 
 Have you ever needed to work with more complicated entity relationships?
 Perhaps a planet within a solar system?
-Molecule makes it easy to traverse parent entities
-Let's create a solar system and add some objects
+Molecule makes it easy to traverse parent entities.
+Let's create a solar system and add some objects.
 
 ```clj
 @(d/transact @conn [{:db/id (d/tempid :db.part/user)
@@ -146,8 +146,6 @@ Let's create a solar system and add some objects
 Warn if datomic dependency isn't present
 
 Transact entities 
-
-Use an atom for the connection
 
 FIX https://github.com/petergarbers/molecule/blob/master/test/molecule/core_test.clj#L37
 
