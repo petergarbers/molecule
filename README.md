@@ -1,8 +1,61 @@
 # molecule [![Build Status](https://travis-ci.org/petergarbers/molecule.svg?branch=master)](https://travis-ci.org/petergarbers/molecule) [![Clojars Project](https://img.shields.io/clojars/v/molecule.svg)](https://clojars.org/molecule)
 
 
+## Overview
+Molecule is a simple, intuitive wrapper for the datomic library with the goal (for now) of simplying the querying of datomic entities.
+
+## Why should I care?
+
+Have you found yourself writing derivations of this?
+
+```clj
+(->> (d/q '[:find ?e
+              :in $ ?name
+              :where [?e :object/name ?name]]
+            db name)
+       ffirst
+       (d/entity db))
+
+=> {:db/id 17592186045422}
+
+```
+
+SIMPLIFIED:
+
+```
+(entity {:object/name name})
+
+=> {:db/id 17592186045422}
+```
+
+BUT! What about multiple entities?!
+Well that's easy too!
+
+```
+(defn get-all-gas-objects
+  [db]
+  (->> (d/q '[:find ?e
+              :in $ ?name
+              :where [?e :object/type :object.type/gas]]
+            db name)
+       (map #(d/entity db (first %)))))
+
+=> ({:db/id 17592186045420} {:db/id 17592186045422})
+```
+
+SIMPLIFIED
+
+```
+(entities {:object/type :object.type/gas})
+
+=> ({:db/id 17592186045420} {:db/id 17592186045422})
+```
+
+It does all this and a little more. Please look at the examples below.
+
 ## Installation
 
+This should be really easy!
 
 ```clj
 
@@ -10,73 +63,87 @@
 
 ```
 
+Then it's as simple as requiring molecule in the namespaces you'd like to use it from within
 
-## Examples
+```
+(ns mycoolapp.query
+  (:require [molecule.core :as m]))
+```
 
-Include in your namespace
+In order for molecule to work we need to initialize our conn atom
+I have made this handy-dandy function to help with that. 
 
-```clj
+```
+(m/init db-uri)
+```
 
-(:require [molecule.core :as m])
+It will also load your schema (and seed data), if you'd like. Both of these args are optional.
 
-;; Initialize the conn atom
-
+```
 (m/init db-uri "schema-path.edn" "seed-data.edn")
-
-```
-Connect to your database
-
-```clj
-
-(m/connect db-uri)
-
 ```
 
-Fetch an entity
+The database value is always at your fingertips.
+
+`(m/db)`
+
+
+## Show me more!
+
+Well let's start simple. We can fetch an entity using an entity-id
 
 ```clj
+(m/entity 17592186045420)
 
-(m/entity 123123123)
-
-
+=> {:db/id 17592186045420}
 ```
 
-Multiple entities by ids
+Or by multiple entity ids
 
 ```clj
+(m/entities {:db/id [17592186045420 17592186045422]}
 
-(m/entities {:db/id [123123123123 3434343434343]}
-
+=> ({:db/id 17592186045420} {:db/id 17592186045422})
 ```
 
-All the entities in a collection
+Sometimes just an entity id is enough.
 
 ```clj
+(e {:object/type :object.type/gas})
 
-(db/entities :objects/name)
-
+=> (17592186045420 17592186045422)
 ```
 
-You can traverse backref relationships
+This is where it starts to get useful.
+Ever needed all the entities with an attribute?!
 
 ```clj
+(db/entities :object/name)
 
-(m/entities {:solar-system/_planets solar-system-id :object/name "Uranus"})
-
+=> ({:db/id 17592186045419} {:db/id 17592186045420} ...)
 ```
 
-If you just need id's
+Have you ever needed to work with more complicated entity relationships?
+Perhaps a planet within a solar system?
+Molecule makes it easy to traverse parent entities
+Let's create a solar system and add some objects
 
 ```clj
+@(d/transact @conn [{:db/id (d/tempid :db.part/user)
+                                         :solar-system/name "OURS"
+                                         :solar-system/planets (e :object/name)}])
 
-(m/e {:solar-system/_planets solar-system-id :object/name "Uranus"})
+=> {:db-before datomic.db.Db@860d79f3, :db-after datomic.db.Db@f6674476, :tx-data [#datom[13194139534334 50 #inst "2017-01-08T19:06:39.509-00:00" 13194139534334 true] #datom[17592186045439 63 "OURS" 13194139534334 true] #datom[17592186045439 64 17592186045419 13194139534334 true] #datom[17592186045439 64 17592186045420 13194139534334 true] ..., :tempids {-9223350046623220537 17592186045439}}
 
+;; Now we can actually do this! And it will only show the objects within our solar system
+
+(entities {:solar-system/_planets 17592186045439 :object/name "Jupiter"})
+
+=> ({:db/id 17592186045420})
 ```
 
 ### TODO:
 Warn if datomic dependency isn't present
-
-Read database uri from ENV
 
 Transact entities 
 
