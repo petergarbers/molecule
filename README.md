@@ -84,7 +84,6 @@ The database value is always at your fingertips.
 `(db)`
 
 ### Note:
-
 You are by no means forced to use either the `init` or the `db` fn's. 
 You are welcome to manage your own connection.
 
@@ -95,6 +94,14 @@ All functions accept a database-value as the first argument to the fn's.
 ```
 
 ## Show me more!
+
+It's good to know that all molecule functions accept the database value as an argument:
+
+```clj
+(entity (db) 17592186045420)
+
+=> {:db/id 17592186045420}
+```
 
 Well let's start simple. We can fetch an entity using an entity-id
 
