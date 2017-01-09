@@ -31,21 +31,19 @@ OMG:
 BUT! What about multiple entities?!
 Well that's easy too!
 
-```
-(defn get-all-gas-objects
-  [db]
-  (->> (d/q '[:find ?e
-              :in $ ?name
-              :where [?e :object/type :object.type/gas]]
-            db name)
-       (map #(d/entity db (first %)))))
+```clj
+(->> (d/q '[:find ?e
+            :in $ ?name
+            :where [?e :object/type :object.type/gas]]
+          db name)
+     (map #(d/entity db (first %))))
 
 => ({:db/id 17592186045420} {:db/id 17592186045422})
 ```
 
 !!!
 
-```
+```clj
 (entities {:object/type :object.type/gas})
 
 => ({:db/id 17592186045420} {:db/id 17592186045422})
@@ -58,14 +56,12 @@ It does all this and a little more. Please look at the examples below.
 This should be really easy!
 
 ```clj
-
 [molecule "0.1.0-SNAPSHOT" :exclusions [com.datomic.datomic-free]] ;; add to your project.clj
-
 ```
 
 Then it's as simple as requiring molecule in the namespaces you'd like to use it from within
 
-```
+```clj
 (ns mycoolapp.query
   (:require [molecule.core :as m]))
 ```
@@ -73,13 +69,13 @@ Then it's as simple as requiring molecule in the namespaces you'd like to use it
 In order for molecule to work we need to initialize our conn atom
 I have made this handy-dandy function to help with that. 
 
-```
+```clj
 (init db-uri)
 ```
 
 It will also load your schema (and seed data), if you'd like. Both of these args are optional.
 
-```
+```clj
 (init db-uri "schema-path.edn" "seed-data.edn")
 ```
 
