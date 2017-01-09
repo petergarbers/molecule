@@ -10,8 +10,8 @@ Have you found yourself writing derivations of this?
 
 ```clj
 (->> (d/q '[:find ?e
-              :in $ ?name
-              :where [?e :object/name ?name]]
+            :in $ ?name
+            :where [?e :object/name ?name]]
             db name)
        ffirst
        (d/entity db))
@@ -20,7 +20,7 @@ Have you found yourself writing derivations of this?
 
 ```
 
-SIMPLIFIED:
+OMG:
 
 ```
 (entity {:object/name name})
@@ -43,7 +43,7 @@ Well that's easy too!
 => ({:db/id 17592186045420} {:db/id 17592186045422})
 ```
 
-SIMPLIFIED
+!!!
 
 ```
 (entities {:object/type :object.type/gas})
@@ -74,26 +74,36 @@ In order for molecule to work we need to initialize our conn atom
 I have made this handy-dandy function to help with that. 
 
 ```
-(m/init db-uri)
+(init db-uri)
 ```
 
 It will also load your schema (and seed data), if you'd like. Both of these args are optional.
 
 ```
-(m/init db-uri "schema-path.edn" "seed-data.edn")
+(init db-uri "schema-path.edn" "seed-data.edn")
 ```
 
 The database value is always at your fingertips.
 
-`(m/db)`
+`(db)`
 
+### Note:
+
+You are by no means forced to use either the `init` or the `db` fn's. 
+You are welcome to manage your own connection.
+
+All functions accept a database-value as the first argument to the fn's.
+
+```clj
+(entities your-db :object.type/gas)
+```
 
 ## Show me more!
 
 Well let's start simple. We can fetch an entity using an entity-id
 
 ```clj
-(m/entity 17592186045420)
+(entity 17592186045420)
 
 => {:db/id 17592186045420}
 ```
@@ -101,7 +111,7 @@ Well let's start simple. We can fetch an entity using an entity-id
 Or by multiple entity ids
 
 ```clj
-(m/entities {:db/id [17592186045420 17592186045422]}
+(entities {:db/id [17592186045420 17592186045422]}
 
 => ({:db/id 17592186045420} {:db/id 17592186045422})
 ```
@@ -118,7 +128,7 @@ This is where it starts to get useful.
 Ever needed all the entities with an attribute?!
 
 ```clj
-(db/entities :object/name)
+(entities :object/name)
 
 => ({:db/id 17592186045419} {:db/id 17592186045420} ...)
 ```
@@ -130,8 +140,8 @@ Let's create a solar system and add some objects.
 
 ```clj
 @(d/transact @conn [{:db/id (d/tempid :db.part/user)
-                                         :solar-system/name "OURS"
-                                         :solar-system/planets (e :object/name)}])
+                                      :solar-system/name "OURS"
+                                      :solar-system/planets (e :object/name)}])
 
 => {:db-before datomic.db.Db@860d79f3, :db-after datomic.db.Db@f6674476, :tx-data [#datom[13194139534334 50 #inst "2017-01-08T19:06:39.509-00:00" 13194139534334 true] #datom[17592186045439 63 "OURS" 13194139534334 true] #datom[17592186045439 64 17592186045419 13194139534334 true] #datom[17592186045439 64 17592186045420 13194139534334 true] ..., :tempids {-9223350046623220537 17592186045439}}
 
