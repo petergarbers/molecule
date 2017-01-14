@@ -7,14 +7,15 @@
   :object/meanRadius 696000.0}
  {:db/id #db/id [:db.part/user]
   :object/name "Jupiter"
-  :object/type :object.type/solid
+  :object/type :object.type/gas
   :object/meanRadius 69911.0}
  {:db/id #db/id [:db.part/user]
   :object/name "Saturn"
   :object/meanRadius 58232.0}
  {:db/id #db/id [:db.part/user]
   :object/name "Uranus"
-  :object/meanRadius 25362.0}
+  :object/meanRadius 25362.0
+  :object/type :object.type/gas}
  {:db/id #db/id [:db.part/user]
   :object/name "Neptune"
   :object/meanRadius 24622.0}

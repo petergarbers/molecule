@@ -34,7 +34,7 @@
   :db/isComponent false
   :db/cardinality :db.cardinality/one
   :db.install/_attribute :db.part/db}
- {:db/id #db/id[:db.part/user] :db/ident :object.type/solid}
+ {:db/id #db/id[:db.part/user] :db/ident :object.type/gas}
  {:db/id #db/id [:db.part/db]
   :db/ident :data/source
   :db/doc "Source of the data in a transaction."
