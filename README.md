@@ -56,7 +56,7 @@ It does all this and a little more. Please look at the examples below.
 This should be really easy!
 
 ```clj
-[molecule "0.1.0-SNAPSHOT" :exclusions [com.datomic.datomic-free]] ;; add to your project.clj
+[molecule "0.1.1-SNAPSHOT"] ;; add to your project.clj
 ```
 
 Then it's as simple as requiring molecule in the namespaces you'd like to use it from within
@@ -67,7 +67,7 @@ Then it's as simple as requiring molecule in the namespaces you'd like to use it
 ```
 
 In order for molecule to work we need to initialize our conn atom
-I have made this handy-dandy function to help with that. 
+I have made this handy-dandy function to help with that.
 
 ```clj
 (init db-uri)
@@ -84,7 +84,7 @@ The database value is always at your fingertips.
 `(db)`
 
 ### Note:
-You are by no means forced to use either the `init` or the `db` fn's. 
+You are by no means forced to use either the `init` or the `db` fn's.
 You are welcome to manage your own connection.
 
 All functions accept a database-value as the first argument to the fn's.
@@ -158,13 +158,13 @@ Let's create a solar system and add some objects.
 ### TODO:
 Warn if datomic dependency isn't present
 
-Transact entities 
+Transact entities
 
 FIX https://github.com/petergarbers/molecule/blob/master/test/molecule/core_test.clj#L37
 
 ### Thanks
 
-Geoff Catlin 
+Geoff Catlin
 
 ## License
 
