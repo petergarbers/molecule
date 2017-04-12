@@ -8,8 +8,9 @@ jdk:
 
 lein: lein2
 
-script: lein2 test
+script: lein2 with-profile dev test
 
 branches:
   only:
     - master
+    - feature/datomic-to-dev-dependencies
